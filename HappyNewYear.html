@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025新年快乐</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #000;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        #countdown {
+            font-size: 3rem;
+            font-weight: bold;
+            text-align: center;
+            animation: color-change 15s linear infinite;
+            -webkit-transition: opacity 1s ease-out;
+            -moz-transition: opacity 1s ease-out;
+            -o-transition: opacity 1s ease-out;
+            transition: opacity 1s ease-out;
+        }
+
+        @keyframes color-change {
+            0% {
+                color: #ff9a9e;
+            }
+
+            14% {
+                color: #fad0c4;
+            }
+
+            28% {
+                color: #fbc2eb;
+            }
+
+            42% {
+                color: #a18cd1;
+            }
+
+            57% {
+                color: #84fab0;
+            }
+
+            71% {
+                color: #8fd3f4;
+            }
+
+            85% {
+                color: #a6c1ee;
+            }
+
+            100% {
+                color: #ff9a9e;
+            }
+        }
+
+        #countdown.fade-out {
+            opacity: 0;
+        }
+
+        #new-year-message {
+            font-size: 3rem;
+            text-align: center;
+            opacity: 0;
+            -webkit-transition: opacity 1s ease-in;
+            -moz-transition: opacity 1s ease-in;
+            -o-transition: opacity 1s ease-in;
+            transition: opacity 1s ease-in;
+        }
+
+        #new-year-message.fade-in {
+            opacity: 1;
+        }
+
+        .animated-text {
+            display: inline-block;
+            opacity: 0;
+            -webkit-transform: scale(0.5);
+            -moz-transform: scale(0.5);
+            -ms-transform: scale(0.5);
+            -o-transform: scale(0.5);
+            transform: scale(0.5);
+            -webkit-transition: all 0.5s ease;
+            -moz-transition: all 0.5s ease;
+            -o-transition: all 0.5s ease;
+            transition: all 0.5s ease;
+            animation: color-change 15s linear infinite;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3), 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
+        .animated-text.visible {
+            opacity: 1;
+            -webkit-transform: scale(1);
+            -moz-transform: scale(1);
+            -ms-transform: scale(1);
+            -o-transform: scale(1);
+            transform: scale(1);
+        }
+
+        #greeting .animated-text {
+            font-size: 1.2em;
+        }
+
+        #wish .animated-text {
+            font-size: 0.8em;
+        }
+
+        #skip-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 2px solid #fff;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            -webkit-transition: all 0.3s ease;
+            -moz-transition: all 0.3s ease;
+            -o-transition: all 0.3s ease;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        #skip-button:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+            -webkit-transform: scale(1.05);
+            -moz-transform: scale(1.05);
+            -ms-transform: scale(1.05);
+            -o-transform: scale(1.05);
+            transform: scale(1.05);
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            #countdown {
+                font-size: 2rem;
+            }
+
+            #new-year-message {
+                font-size: 2rem;
+            }
+
+            #greeting .animated-text {
+                font-size: 0.9em;
+            }
+
+            #wish .animated-text {
+                font-size: 0.7em;
+            }
+
+            #skip-button {
+                top: 10px;
+                left: 10px;
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #countdown {
+                font-size: 1.5rem;
+            }
+
+            #new-year-message {
+                font-size: 1.5rem;
+            }
+
+            #greeting .animated-text {
+                font-size: 0.8em;
+            }
+
+            #wish .animated-text {
+                font-size: 0.6em;
+            }
+
+            #skip-button {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            #countdown {
+                font-size: 1.2rem;
+            }
+
+            #new-year-message {
+                font-size: 1.2rem;
+            }
+
+            #greeting .animated-text {
+                font-size: 0.7em;
+            }
+
+            #wish .animated-text {
+                font-size: 0.5em;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <button id="skip-button">跳过倒计时</button>
+    <div id="countdown"></div>
+    <div id="new-year-message">
+        <h1 id="greeting"></h1>
+        <p id="wish"></p>
+    </div>
+    <canvas id="fireworks"></canvas>
+
+    <script>
+        (function () {
+            var countdownElement = document.getElementById('countdown');
+            var newYearMessageElement = document.getElementById('new-year-message');
+            var greetingElement = document.getElementById('greeting');
+            var wishElement = document.getElementById('wish');
+            var fireworksCanvas = document.getElementById('fireworks');
+            var ctx = fireworksCanvas.getContext('2d');
+
+            var skipButton = document.getElementById('skip-button');
+	    
+            skipButton.addEventListener('click', function () {
+                clearInterval(countdownInterval);
+                switchToNewYear();
+                skipButton.style.display = 'none';
+            });
+
+            function resizeCanvas() {
+                fireworksCanvas.width = window.innerWidth;
+                fireworksCanvas.height = window.innerHeight;
+            }
+
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+
+            function updateCountdown() {
+                var now = new Date();
+                var newYear = new Date('2025-01-01T00:00:00');
+                var diff = newYear - now;
+
+                if (diff > 0) {
+                    var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    var hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    var seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                    countdownElement.innerHTML = days + '天 ' + hours + '小时 ' + minutes + '分钟 ' + seconds + '秒';
+                } else {
+                    clearInterval(countdownInterval);
+		    skipButton.style.display = 'none';
+                    switchToNewYear();
+                }
+            }
+
+            function switchToNewYear() {
+                countdownElement.classList.add('fade-out');
+                setTimeout(function () {
+                    countdownElement.style.display = 'none';
+                    newYearMessageElement.style.display = 'block';
+                    setTimeout(function () {
+                        newYearMessageElement.classList.add('fade-in');
+                        animateText('新年快乐！', greetingElement);
+                        setTimeout(function () {
+                            animateText('新的一年，祝你每一天都充满阳光和笑声，心想事成，万事如意！', wishElement);
+                        }, 1000);
+                        startFireworks();
+                    }, 50);
+                }, 1000);
+            }
+
+            function animateText(text, element) {
+                element.innerHTML = '';
+                for (var i = 0; i < text.length; i++) {
+                    (function (i) {
+                        var span = document.createElement('span');
+                        span.textContent = text[i];
+                        span.className = 'animated-text';
+                        element.appendChild(span);
+                        setTimeout(function () {
+                            span.classList.add('visible');
+                        }, i * 100);
+                    })(i);
+                }
+            }
+
+            var countdownInterval = setInterval(updateCountdown, 1000);
+            updateCountdown();
+
+            function startFireworks() {
+                var fireworks = [];
+                var particles = [];
+                var intensity = 0;
+
+                function Firework() {
+                    this.x = Math.random() * fireworksCanvas.width;
+                    this.y = fireworksCanvas.height;
+                    this.sx = Math.random() * 3 - 1.5;
+                    this.sy = Math.random() * -5 - 5;
+                    this.size = 2;
+                    this.color = 'hsl(' + (Math.random() * 360) + ', 100%, 50%)';
+                    this.life = 150;
+                }
+
+                Firework.prototype.update = function () {
+                    this.x += this.sx;
+                    this.y += this.sy;
+                    this.sy += 0.05;
+                    this.life--;
+
+                    if (this.life <= 0 || this.sy >= 0) {
+                        createParticles(this.x, this.y, this.color);
+                        return false;
+                    }
+                    return true;
+                }
+
+                Firework.prototype.draw = function () {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                function Particle(x, y, color) {
+                    this.x = x;
+                    this.y = y;
+                    this.sx = Math.random() * 4 - 2;
+                    this.sy = Math.random() * 4 - 2;
+                    this.size = Math.random() * 2 + 1;
+                    this.color = color;
+                    this.life = 70 + Math.random() * 50;
+                }
+
+                Particle.prototype.update = function () {
+                    this.x += this.sx;
+                    this.y += this.sy;
+                    this.size *= 0.96;
+                    this.life--;
+
+                    return this.life > 0 && this.size > 0.1;
+                }
+
+                Particle.prototype.draw = function () {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                function createParticles(x, y, color) {
+                    for (var i = 0; i < 100; i++) {
+                        particles.push(new Particle(x, y, color));
+                    }
+                }
+
+                function animate() {
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                    ctx.fillRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
+
+                    if (Math.random() < 0.05 * intensity) {
+                        fireworks.push(new Firework());
+                    }
+
+                    for (var i = fireworks.length - 1; i >= 0; i--) {
+                        if (!fireworks[i].update()) {
+                            fireworks.splice(i, 1);
+                        } else {
+                            fireworks[i].draw();
+                        }
+                    }
+
+                    for (var i = particles.length - 1; i >= 0; i--) {
+                        if (!particles[i].update()) {
+                            particles.splice(i, 1);
+                        } else {
+                            particles[i].draw();
+                        }
+                    }
+
+                    intensity = Math.min(intensity + 0.01, 1);
+
+                    requestAnimationFrame(animate);
+                }
+
+                animate();
+            }
+
+            function isMobile() {
+                return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            }
+
+            if (isMobile()) {
+                Firework.prototype.size = 1.5;
+                Particle.prototype.size = Math.random() * 1.5 + 0.5;
+            }
+
+            updateCountdown();
+        })();
+    </script>
+</body>
+
+</html>
